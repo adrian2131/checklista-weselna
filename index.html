@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f7f3ed">
+  <title>Nasza checklista weselna</title>
+  <link rel="stylesheet" href="styles.css?v=20260623-3">
+</head>
+<body>
+  <main class="app">
+    <header>
+      <div>
+        <p class="eyebrow">Plan wesela</p>
+        <h1>Nasza checklista</h1>
+        <p class="subtitle">Prosty notatnik na wszystkie rzeczy do załatwienia. <span id="syncStatus" class="sync-status">Tryb lokalny</span></p>
+      </div>
+      <div class="progress-card">
+        <strong id="progressText">0 z 0</strong>
+        <span>gotowe</span>
+        <div class="progress-track"><div id="progressBar"></div></div>
+      </div>
+    </header>
+
+    <form id="taskForm" class="add-form">
+      <label>
+        Co trzeba zrobić?
+        <input id="taskInput" required maxlength="120" placeholder="Np. Odebrać bukiet">
+      </label>
+      <label>
+        Kto?
+        <input id="ownerInput" maxlength="50" placeholder="Np. Adrian">
+      </label>
+      <label>
+        Kiedy?
+        <select id="dayInput">
+          <option>Sala</option>
+          <option>Kościół</option>
+          <option>Środa</option>
+          <option>Piątek do południa</option>
+          <option>Piątek wieczorem</option>
+          <option selected>Sobota</option>
+          <option>Inne</option>
+        </select>
+      </label>
+      <button type="submit">Dodaj zadanie</button>
+    </form>
+
+    <section class="task-tools" aria-label="Wyszukiwanie i filtrowanie zadań">
+      <label class="tool-search">
+        <span aria-hidden="true">⌕</span>
+        <input id="searchInput" type="search" aria-label="Szukaj zadań" placeholder="Szukaj zadania lub osoby...">
+      </label>
+      <label class="tool-select">
+        <span>Termin</span>
+        <select id="dayFilter" aria-label="Filtruj według terminu">
+          <option value="all">Wszystkie terminy</option>
+          <option>Sala</option>
+          <option>Kościół</option>
+          <option>Środa</option>
+          <option>Piątek do południa</option>
+          <option>Piątek wieczorem</option>
+          <option>Sobota</option>
+          <option>Inne</option>
+        </select>
+      </label>
+      <label class="tool-select">
+        <span>Osoba</span>
+        <select id="ownerFilter" aria-label="Filtruj według osoby">
+          <option value="all">Wszystkie osoby</option>
+        </select>
+      </label>
+    </section>
+
+    <nav class="filters" aria-label="Filtrowanie według statusu">
+      <button class="active" data-filter="all">Wszystkie</button>
+      <button data-filter="todo">Do zrobienia</button>
+      <button data-filter="done">Gotowe</button>
+      <span id="visibleCount" class="visible-count"></span>
+    </nav>
+
+    <section id="taskList" class="task-list" aria-live="polite"></section>
+    <p id="emptyState" class="empty" hidden>Nie ma tutaj żadnych zadań.</p>
+  </main>
+
+  <template id="taskTemplate">
+    <article class="task">
+      <button class="drag-handle" type="button" aria-label="Przeciągnij zadanie" title="Przeciągnij, aby zmienić kolejność">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <label class="check">
+        <input type="checkbox">
+        <span></span>
+      </label>
+      <div class="task-copy">
+        <strong></strong>
+        <small></small>
+      </div>
+      <div class="task-actions">
+        <button class="edit" type="button">Edytuj</button>
+        <button class="delete" type="button" aria-label="Usuń zadanie">Usuń</button>
+      </div>
+    </article>
+  </template>
+
+  <dialog id="editDialog">
+    <form id="editForm" method="dialog">
+      <div class="dialog-heading">
+        <div>
+          <p id="dialogEyebrow" class="eyebrow">Zmiana zadania</p>
+          <h2 id="dialogTitle">Edytuj zadanie</h2>
+        </div>
+        <button class="dialog-close" type="button" aria-label="Zamknij">×</button>
+      </div>
+      <label>
+        Co trzeba zrobić?
+        <input id="editTaskInput" required maxlength="120">
+      </label>
+      <label>
+        Kto?
+        <input id="editOwnerInput" maxlength="50" list="ownerSuggestions">
+      </label>
+      <label>
+        Kiedy?
+        <select id="editDayInput">
+          <option>Środa</option>
+          <option>Sala</option>
+          <option>Kościół</option>
+          <option>Piątek do południa</option>
+          <option>Piątek wieczorem</option>
+          <option>Sobota</option>
+          <option>Inne</option>
+        </select>
+      </label>
+      <div class="dialog-actions">
+        <button class="cancel-edit" type="button">Anuluj</button>
+        <button id="saveTaskButton" class="save-edit" type="submit">Zapisz zmiany</button>
+      </div>
+    </form>
+  </dialog>
+  <datalist id="ownerSuggestions"></datalist>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js?v=20260623-2"></script>
+  <script src="script.js?v=20260623-9"></script>
+</body>
+</html>
