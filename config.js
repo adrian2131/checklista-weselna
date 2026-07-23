@@ -3,5 +3,5 @@
 window.SUPABASE_CONFIG = {
   url: "https://xarzparhjhbxdidgunjt.supabase.co",
   publishableKey: "sb_publishable_WJ9EjtQIeJjl7teyQImx8w_63xBqOPF",
-  previewOnly: true
+  previewOnly: false
 };
