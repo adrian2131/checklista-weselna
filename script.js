@@ -445,6 +445,7 @@ async function updateTask(task, previousTask = null) {
   }
   saveLocalTasks();
   setSyncStatus("Zapis online", "online");
+  render();
 }
 
 async function deleteTask(task) {
