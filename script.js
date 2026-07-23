@@ -176,7 +176,22 @@ const cloudSeedVersionKey = `${storageKey}-cloud-seed-version`;
 const assignmentVersionKey = `${storageKey}-assignment-version`;
 const cloudAssignmentVersionKey = `${storageKey}-cloud-assignment-version`;
 const contentVersionKey = `${storageKey}-content-version`;
-const dayOrder = ["Inne", "Sala", "Kościół", "Środa", "Piątek do południa", "Piątek wieczorem", "Sobota"];
+const dateLabelFormatter = new Intl.DateTimeFormat("pl-PL", { weekday: "long", day: "2-digit", month: "2-digit", year: "numeric" });
+
+function isDateValue(value) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(value || "");
+}
+
+function formatDateLabel(value) {
+  if (!isDateValue(value)) return "Bez terminu";
+  const [year, month, day] = value.split("-").map(Number);
+  const label = dateLabelFormatter.format(new Date(year, month - 1, day));
+  return label.charAt(0).toLocaleUpperCase("pl") + label.slice(1);
+}
+
+function groupKey(task) {
+  return isDateValue(task.day) ? task.day : "";
+}
 const form = document.querySelector("#taskForm");
 const taskList = document.querySelector("#taskList");
 const emptyState = document.querySelector("#emptyState");
@@ -475,14 +490,21 @@ function render() {
   taskList.replaceChildren();
   const visible = tasks.filter((task) => {
     const matchesStatus = filter === "all" || (filter === "done" ? task.done : !task.done);
-    const matchesDay = selectedDay === "all" || task.day === selectedDay;
+    const matchesDay = selectedDay === "all" || groupKey(task) === selectedDay;
     const matchesOwner = selectedOwner === "all" || (selectedOwner === "" ? !task.owner : task.owner === selectedOwner);
     const haystack = normalizeTaskText(`${task.text} ${task.owner} ${task.day}`);
     return matchesStatus && matchesDay && matchesOwner && haystack.includes(search);
   });
 
-  dayOrder.forEach((day) => {
-    const dayTasks = visible.filter((task) => task.day === day);
+  const groupKeys = [...new Set(visible.map(groupKey))].sort((a, b) => {
+    if (a === b) return 0;
+    if (a === "") return -1;
+    if (b === "") return 1;
+    return a.localeCompare(b);
+  });
+
+  groupKeys.forEach((key) => {
+    const dayTasks = visible.filter((task) => groupKey(task) === key);
     if (!dayTasks.length) return;
 
     const group = document.createElement("section");
@@ -490,15 +512,15 @@ function render() {
     const heading = document.createElement("h2");
     const countLabel = document.createElement("span");
     heading.className = "day-heading";
-    heading.textContent = day;
+    heading.textContent = formatDateLabel(key);
     countLabel.textContent = `${dayTasks.length} zadań`;
     heading.append(countLabel);
     const addButton = document.createElement("button");
     addButton.type = "button";
     addButton.className = "add-to-section";
     addButton.textContent = "Dodaj";
-    addButton.setAttribute("aria-label", `Dodaj zadanie do sekcji ${day}`);
-    addButton.addEventListener("click", () => openAddDialog(day));
+    addButton.setAttribute("aria-label", `Dodaj zadanie do: ${formatDateLabel(key)}`);
+    addButton.addEventListener("click", () => openAddDialog(key));
     heading.append(addButton);
     group.append(heading);
 
@@ -508,7 +530,9 @@ function render() {
       const checkbox = item.querySelector("input");
       checkbox.checked = task.done;
       item.querySelector("strong").textContent = task.text;
-      item.querySelector("small").textContent = task.owner ? `Odpowiedzialny: ${task.owner}` : "Nie przypisano osoby";
+      const ownerText = task.owner ? `Odpowiedzialny: ${task.owner}` : "Nie przypisano osoby";
+      const legacyHint = !isDateValue(task.day) && task.day ? ` · dawna kategoria: ${task.day}` : "";
+      item.querySelector("small").textContent = ownerText + legacyHint;
 
       checkbox.addEventListener("change", () => {
         const previousTask = { ...task };
@@ -531,6 +555,7 @@ function render() {
   document.querySelector("#progressBar").style.width = tasks.length ? `${done / tasks.length * 100}%` : "0%";
   visibleCount.textContent = `Widoczne: ${visible.length}`;
   updateOwnerFilter();
+  updateDayFilter();
 }
 
 function setupDragAndDrop(item, task) {
@@ -615,6 +640,17 @@ function updateOwnerFilter() {
   }));
 }
 
+function updateDayFilter() {
+  const currentValue = dayFilter.value;
+  const dates = [...new Set(tasks.filter((task) => isDateValue(task.day)).map((task) => task.day))].sort((a, b) => a.localeCompare(b));
+  const hasUndated = tasks.some((task) => !isDateValue(task.day));
+  dayFilter.replaceChildren(new Option("Wszystkie terminy", "all"));
+  if (hasUndated) dayFilter.add(new Option("Bez terminu", ""));
+  dates.forEach((date) => dayFilter.add(new Option(formatDateLabel(date), date)));
+  const values = ["all", ...(hasUndated ? [""] : []), ...dates];
+  dayFilter.value = values.includes(currentValue) ? currentValue : "all";
+}
+
 function openEditDialog(task) {
   editedTask = task;
   dialogEyebrow.textContent = "Zmiana zadania";
@@ -622,7 +658,7 @@ function openEditDialog(task) {
   saveTaskButton.textContent = "Zapisz zmiany";
   editTaskInput.value = task.text;
   editOwnerInput.value = task.owner;
-  editDayInput.value = task.day;
+  editDayInput.value = isDateValue(task.day) ? task.day : "";
   editDialog.showModal();
   editTaskInput.focus();
 }
@@ -630,7 +666,7 @@ function openEditDialog(task) {
 function openAddDialog(day) {
   editedTask = null;
   dialogEyebrow.textContent = "Nowy punkt";
-  dialogTitle.textContent = `Dodaj do: ${day}`;
+  dialogTitle.textContent = `Dodaj do: ${formatDateLabel(day)}`;
   saveTaskButton.textContent = "Dodaj zadanie";
   editTaskInput.value = "";
   editOwnerInput.value = "";

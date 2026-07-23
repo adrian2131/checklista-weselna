@@ -32,16 +32,8 @@
         <input id="ownerInput" maxlength="50" placeholder="Np. Adrian">
       </label>
       <label>
-        Kiedy?
-        <select id="dayInput">
-          <option>Sala</option>
-          <option>Kościół</option>
-          <option>Środa</option>
-          <option>Piątek do południa</option>
-          <option>Piątek wieczorem</option>
-          <option selected>Sobota</option>
-          <option>Inne</option>
-        </select>
+        Kiedy? (data — zostaw puste, jeśli bez terminu)
+        <input id="dayInput" type="date">
       </label>
       <button type="submit">Dodaj zadanie</button>
     </form>
@@ -55,13 +47,6 @@
         <span>Termin</span>
         <select id="dayFilter" aria-label="Filtruj według terminu">
           <option value="all">Wszystkie terminy</option>
-          <option>Sala</option>
-          <option>Kościół</option>
-          <option>Środa</option>
-          <option>Piątek do południa</option>
-          <option>Piątek wieczorem</option>
-          <option>Sobota</option>
-          <option>Inne</option>
         </select>
       </label>
       <label class="tool-select">
@@ -123,16 +108,8 @@
         <input id="editOwnerInput" maxlength="50" list="ownerSuggestions">
       </label>
       <label>
-        Kiedy?
-        <select id="editDayInput">
-          <option>Środa</option>
-          <option>Sala</option>
-          <option>Kościół</option>
-          <option>Piątek do południa</option>
-          <option>Piątek wieczorem</option>
-          <option>Sobota</option>
-          <option>Inne</option>
-        </select>
+        Kiedy? (data — zostaw puste, jeśli bez terminu)
+        <input id="editDayInput" type="date">
       </label>
       <div class="dialog-actions">
         <button class="cancel-edit" type="button">Anuluj</button>
@@ -143,7 +120,7 @@
   <datalist id="ownerSuggestions"></datalist>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="config.js?v=20260723-1"></script>
-  <script src="script.js?v=20260723-1"></script>
+  <script src="config.js?v=20260723-2"></script>
+  <script src="script.js?v=20260723-2"></script>
 </body>
 </html>
